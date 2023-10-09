@@ -14,7 +14,7 @@ SELECT timeofday();
 CREATE TABLE SubscriptionKinds (
     subscriptionMode CHAR(1),
     subscriptionInterval INTERVAL,
-    rate NUMERIC(4,2),
+    rate NUMERIC(6,2),
     stillOffered BOOL,
     PRIMARY KEY (subscriptionMode, subscriptionInterval) 
 
@@ -67,8 +67,8 @@ CREATE TABLE Articles (
     articleAuthor VARCHAR(30),
     articlePage INT,
     PRIMARY KEY (editionDate, articleNum),
-    FOREIGN KEY (editionDate) REFERENCES Editions
-    
+    FOREIGN KEY (editionDate) REFERENCES Editions(editionDate)
+
 --  FOREIGN KEY (editionDate,articlePage, articleNum) REFERENCES Editions(editionDate, numPages, numArticles)
 
 );
@@ -81,7 +81,7 @@ CREATE TABLE ReadArticles (
     articleNum INT,
     readInterval INTERVAL,
     PRIMARY KEY (subscriberPhone, editionDate, articleNum),
-    FOREIGN KEY (subscriberPhone) REFERENCES Subscribers,
+    FOREIGN KEY (subscriberPhone) REFERENCES Subscribers(subscriberPhone),
     FOREIGN KEY (editionDate, articleNum) REFERENCES Articles(editionDate, articleNum)
  --   FOREIGN KEY (readInterval) REFERENCES SubscriptionKinds(subscriptionInterval)
 
