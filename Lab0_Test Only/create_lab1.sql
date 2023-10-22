@@ -84,7 +84,6 @@ CREATE TABLE ReadArticles (
     FOREIGN KEY (subscriberPhone) REFERENCES Subscribers(subscriberPhone),
     FOREIGN KEY (editionDate, articleNum) REFERENCES Articles(editionDate, articleNum)
  --   FOREIGN KEY (readInterval) REFERENCES SubscriptionKinds(subscriptionInterval)
-
 );
 
 
