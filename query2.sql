@@ -1,10 +1,10 @@
-SELECT DISTINCT sb.subscriberPhone, sb.subscriberName
-FROM subscribers sb, SubscriptionKinds sk
-WHERE sk.rate > 137.25 
-AND EXISTS(SELECT *
-           FROM Subscriptions st
-           WHERE st.paymentReceived = 'FALSE'
-           AND st.subscriberPhone = sb.subscriberPhone
-           )
+SELECT DISTINCT b.subscriberPhone, b.subscriberName
+FROM Subscribers b, SubscriptionKinds sk, Subscriptions C
+WHERE sk.rate > 137.25
+    AND C.paymentReceived = 'FALSE'
+    AND C.subscriberPhone = b.subscriberPhone
+    AND C.subscriptionMode = sk.subscriptionMode
+    AND C.subscriptionInterval = sk.subscriptionInterval
 
-ORDER BY sb.subscriberName, sb.subscriberPhone DESC;
+ORDER BY b.subscriberName, b.subscriberPhone DESC;
+

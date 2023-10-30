@@ -1,4 +1,4 @@
-SELECT DISTINCT e.editionDate AS theEditionDate
+SELECT e.editionDate AS theEditionDate
 FROM Editions e
 WHERE EXISTS (SELECT *
             FROM Articles a

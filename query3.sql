@@ -1,4 +1,4 @@
-SELECT a.articleNum, a.articleAuthor, a.articlePage
+SELECT DISTINCT a.articleNum, a.articleAuthor, a.articlePage
 FROM Articles a
 WHERE NOT EXISTS (SELECT *
             FROM ReadArticles ra, Subscribers sb

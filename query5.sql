@@ -1,8 +1,8 @@
-SELECT DISTINCT S.subscriberName AS theSubscriberName, S.subscriberAddress AS theSubscriberAddress, A.editionDate AS theEditionDate
-FROM Subscribers S, Articles A
-WHERE S.subscriberName IN (
-    SELECT articleAuthor
-    FROM Articles
-    GROUP BY articleAuthor, editionDate
-    HAVING COUNT(*) > 1
+SELECT DISTINCT b.subscriberName AS theSubscriberName, b.subscriberAddress AS theSubscriberAddress, a.editionDate AS theEditionDate
+FROM Subscribers b, Articles a 
+WHERE b.subscriberName IN (
+    SELECT a2.articleAuthor
+    FROM Articles a2
+    WHERE a.editionDate = a2.editionDate
+    AND a.articleNum <> a2.articleNum
 );
