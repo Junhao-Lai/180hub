@@ -1,3 +1,5 @@
+-- Junhao Lai 10/24 Query 1 (2)
+
 SELECT e.editionDate AS theEditionDate
 FROM Editions e
 WHERE EXISTS (SELECT *

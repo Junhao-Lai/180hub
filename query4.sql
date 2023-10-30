@@ -1,3 +1,6 @@
+-- Junhao Lai 10/24 Query 4 (2)
+
+
 SELECT b.subscriberPhone, C.subscriptionStartDate, DATE(C.subscriptionStartDate + sk.subscriptionInterval) AS subscriptionEndDate, b.subscriberName, sk.rate AS subscriptionRate
 FROM Subscribers b, SubscriptionKinds sk, Subscriptions C
 WHERE C.subscriptionStartDate <= DATE '2022-12-17'

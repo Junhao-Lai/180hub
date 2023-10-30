@@ -1,3 +1,6 @@
+-- Junhao Lai 10/24 Query 3 (8)
+
+
 SELECT DISTINCT a.articleNum, a.articleAuthor, a.articlePage
 FROM Articles a
 WHERE NOT EXISTS (SELECT *
