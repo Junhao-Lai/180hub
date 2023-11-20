@@ -1,3 +1,2 @@
 
-CREATE INDEX ArticleSearch ON Articles(articleAuthor, editionDate)
-;
+CREATE INDEX ArticleSearch ON Articles(articleAuthor, editionDate);
