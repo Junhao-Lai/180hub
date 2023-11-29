@@ -14,7 +14,7 @@ The attributes in your result should appear as theSubscriberName, theSubscriberA
 -- instead of "EXISTS", but you can't just replace the word "EXISTS" in those solutions.
 
 -- Lab2 was assigned before the Lecture on Aggregates, and some of these solutions do not
--- use aggregates.
+-- use aggregates
 
 
 SELECT DISTINCT sr.subscriberName AS theSubscriberName,

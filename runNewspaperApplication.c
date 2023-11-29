@@ -62,6 +62,12 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 {
     char stringtheSubscriberPhone[MAXNUMBERSTRINGSIZE];
     sprintf(stringtheSubscriberPhone,"%d",theSubscriberPhone);
+    
+    //check subscriberPhone 是否存在？ exits-> 0 else -> -1
+
+    char select_subPhone[MAXSQLSTATEMENTSTRINGSIZE] = 
+        "SELECT subscriberPhone, subscriberName FROM "
+
 
 }
 
