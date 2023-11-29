@@ -66,7 +66,21 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
     //check subscriberPhone 是否存在？ exits-> 0 else -> -1
 
     char select_subPhone[MAXSQLSTATEMENTSTRINGSIZE] = 
-        "SELECT subscriberPhone, subscriberName FROM "
+        "SELECT subscriberPhone, subscriberName FROM Subscribers"
+        "WHERE subscriberPhone='";
+    
+    strcat(select_subPhone, stringtheSubscriberPhone); //连接
+    strcat(select_subPhone, "'");
+
+    PGresult *res_subPhone = PQexec(conn, select_subPhone);
+    if (PQresultStatus(res_subPhone) != PGRES_TUPLES_OK)
+    {
+        fprintf(stderr, "SELECT subPhone failed: %s, %s", select_subPhone, PQerrorMessage(conn));
+        PQclear(res_subPhone);
+        bad_exit(conn);
+        return -1; 
+    }
+
 
 
 }
