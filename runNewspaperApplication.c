@@ -81,6 +81,17 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
         return -1; 
     }
 
+    int numTuples_subPhone = PQntuples(res_subPhone);
+    if (numTuples_subPhone == 0 )
+    {
+        printf("\n\n subscriberPhone %s does not exist\n ", stringtheSubscriberPhone);
+        PQclear(res_subPhone);
+        bad_exit(conn);
+        return -1;
+    }
+
+
+    char 
 
 
 }
