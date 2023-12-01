@@ -73,7 +73,7 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
     strcat(selectstmt, "'");
 
 
-    printf("1st Full statement is %s \n", selectstmt);
+    printf("\n1st Full statement is %s \n", selectstmt);
 
     PGresult *res = PQexec(conn, selectstmt);
 
@@ -89,7 +89,7 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
     int numTuples = PQntuples(res);
     if (numTuples == 0)
     {
-        printf("\n subscriberPhone %s DOES NOT EXIST :( \n", stringSubscriberPhone);
+        printf("\nsubscriberPhone %s DOES NOT EXIST :( \n", stringSubscriberPhone);
         PQclear(res);
         bad_exit(conn);
         return -1;
@@ -97,10 +97,10 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 
     char *number = PQgetvalue(res,0,0);
     char *name = PQgetvalue(res,0,1);
-    printf("Number: %s is owned by %s\n\n", number, name);
+    printf("\nNumber: %s is owned by %s\n", number, name);
     PQclear(res);
 
-    printf("Starting count!\n\n");
+    printf("\nStarting count!\n");
 
     char coin[MAXSQLSTATEMENTSTRINGSIZE] = 
         "SELECT s1.subscriptionStartDate, s1.subscriptionInterval "
@@ -115,10 +115,6 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
         "AND s1.subscriptionStartDate <= s2.subscriptionStartDate AND "
         "s2.subscriptionStartDate <= DATE(s1.subscriptionStartDate + s1.subscriptionInterval))");
 
-
-
-
-    
     PGresult *countRes = PQexec(conn, coin);
     
     if (PQresultStatus(countRes) != PGRES_TUPLES_OK)
@@ -129,7 +125,11 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
         return -1;
     }
 
+
     int count = PQntuples(countRes);
+//    char *phoneNumber = PQgetvalue(countRes,0,0); date 
+    printf("\nSubscriber %d has %d coincident subscriptions \n", theSubscriberPhone, count);
+
     return count;
 
 
