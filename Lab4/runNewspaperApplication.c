@@ -60,40 +60,7 @@ static void bad_exit(PGconn *conn)
 
 int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 {
-    char stringtheSubscriberPhone[MAXNUMBERSTRINGSIZE];
-    sprintf(stringtheSubscriberPhone,"%d",theSubscriberPhone);
-    
-    //check subscriberPhone 是否存在？ exits-> 0 else -> -1
-
-    char select_subPhone[MAXSQLSTATEMENTSTRINGSIZE] = 
-        "SELECT subscriberPhone, subscriberName FROM Subscribers"
-        "WHERE subscriberPhone='";
-    
-    strcat(select_subPhone, stringtheSubscriberPhone); //连接
-    strcat(select_subPhone, "'");
-
-    PGresult *res_subPhone = PQexec(conn, select_subPhone);
-    if (PQresultStatus(res_subPhone) != PGRES_TUPLES_OK)
-    {
-        fprintf(stderr, "SELECT subPhone failed: %s, %s", select_subPhone, PQerrorMessage(conn));
-        PQclear(res_subPhone);
-        bad_exit(conn);
-        return -1; 
-    }
-
-    int numTuples_subPhone = PQntuples(res_subPhone);
-    if (numTuples_subPhone == 0 )
-    {
-        printf("\n\n subscriberPhone %s does not exist\n ", stringtheSubscriberPhone);
-        PQclear(res_subPhone);
-        bad_exit(conn);
-        return -1;
-    }
-
-
-    char 
-
-
+    return 0;
 }
 
 /* Function: changeAddresses:
@@ -108,7 +75,7 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 
 int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
 {
-
+    return 0;
 }
 
 /* Function: increaseSomeRates:
@@ -125,7 +92,7 @@ int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
 
 int increaseSomeRates(PGconn *conn, int maxTotalRateIncrease)
 {    
-
+    return 0;
 }
 
 int main(int argc, char **argv)
