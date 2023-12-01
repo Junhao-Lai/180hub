@@ -65,11 +65,13 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 
     sprintf(stringSubscriberPhone, "%d",theSubscriberPhone);
 
+
     char selectstmt[MAXSQLSTATEMENTSTRINGSIZE] =
-        "SELECT subscriberPhone, subscriberName FROM Subscribers WHERE "
+        "SELECT subscriberPhone FROM Subscribers WHERE "
         "subscriberPhone='";
     strcat(selectstmt, stringSubscriberPhone);
     strcat(selectstmt, "'");
+
 
     printf("1st Full statement is %s \n", selectstmt);
 
@@ -97,10 +99,28 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
     char *name = PQgetvalue(res,0,1);
     printf("Number: %s is owned by %s", number, name);
     PQclear(res);
+
+    char coin[MAXSQLSTATEMENTSTRINGSIZE] = 
+       // "SELECT C.subscriptionStartDate, DATE(C.subscriptionStartDate + C.subscriptionInterval) AS subscriptionEndDate" 
+        "SELECT COUNT(*)"
+        "FROM Subscriptions s1, Subscriptions s2"
+        "WHERE s1.subscriptionStartDate <= s2.subscriptionStartDate AND"
+        "s2.subscriptionStartDate <= DATE(s1.subscriptionStartDate + s1.subscriptionInterval) ";
     
-   
-   
-   // return 0;
+    PGresult *countRes = PQexec(conn, coin);
+    
+    if (PQresultStatus(countRes) != PGRES_TUPLES_OK)
+    {
+        fprintf(stderr,"Error counting coincident: %s\n", PQerrorMessage(conn));
+        PQclear(countRes);
+        bad_exit(conn);
+        return -1;
+    }
+
+    int count = PQntuples(countRes);
+    return count;
+
+
 }
 
 /* Function: changeAddresses:
@@ -115,7 +135,7 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 
 int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
 {
-    return 0;
+
 }
 
 /* Function: increaseSomeRates:
@@ -132,7 +152,7 @@ int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
 
 int increaseSomeRates(PGconn *conn, int maxTotalRateIncrease)
 {    
-    return 0;
+
 }
 
 int main(int argc, char **argv)
