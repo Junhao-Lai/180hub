@@ -67,7 +67,7 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 
 
     char selectstmt[MAXSQLSTATEMENTSTRINGSIZE] =
-        "SELECT subscriberPhone FROM Subscribers WHERE "
+        "SELECT subscriberPhone, subscriberName FROM Subscribers WHERE "
         "subscriberPhone='";
     strcat(selectstmt, stringSubscriberPhone);
     strcat(selectstmt, "'");
@@ -97,15 +97,27 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 
     char *number = PQgetvalue(res,0,0);
     char *name = PQgetvalue(res,0,1);
-    printf("Number: %s is owned by %s", number, name);
+    printf("Number: %s is owned by %s\n\n", number, name);
     PQclear(res);
 
+    printf("Starting count!\n\n");
+
     char coin[MAXSQLSTATEMENTSTRINGSIZE] = 
-       // "SELECT C.subscriptionStartDate, DATE(C.subscriptionStartDate + C.subscriptionInterval) AS subscriptionEndDate" 
-        "SELECT COUNT(*)"
-        "FROM Subscriptions s1, Subscriptions s2"
-        "WHERE s1.subscriptionStartDate <= s2.subscriptionStartDate AND"
-        "s2.subscriptionStartDate <= DATE(s1.subscriptionStartDate + s1.subscriptionInterval) ";
+        "SELECT s1.subscriptionStartDate, s1.subscriptionInterval "
+        "FROM Subscriptions s1 "
+        "WHERE s1.subscriberPhone ='";
+        strcat(coin, stringSubscriberPhone);
+        strcat(coin, "'");
+        strcat(coin,
+        "AND EXISTS(SELECT *"
+        "FROM Subscriptions s2 "
+        "WHERE s1.subscriberPhone = s2.subscriberPhone "
+        "AND s1.subscriptionStartDate <= s2.subscriptionStartDate AND "
+        "s2.subscriptionStartDate <= DATE(s1.subscriptionStartDate + s1.subscriptionInterval))");
+
+
+
+
     
     PGresult *countRes = PQexec(conn, coin);
     
@@ -135,7 +147,7 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 
 int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
 {
-
+    return 0;
 }
 
 /* Function: increaseSomeRates:
@@ -152,7 +164,7 @@ int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
 
 int increaseSomeRates(PGconn *conn, int maxTotalRateIncrease)
 {    
-
+    return 0;
 }
 
 int main(int argc, char **argv)
@@ -188,6 +200,7 @@ int main(int argc, char **argv)
     /* Perform the calls to countCoincidentSubscriptions listed in Section 6 of Lab4,
      * and print messages as described.
      */
+    countCoincidentSubscriptions(conn, 8315512);
     
     
     /* Extra newline for readability */
