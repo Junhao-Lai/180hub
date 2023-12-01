@@ -60,7 +60,47 @@ static void bad_exit(PGconn *conn)
 
 int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 {
-    return 0;
+    // string of fixed size
+    char stringSubscriberPhone[MAXNUMBERSTRINGSIZE];
+
+    sprintf(stringSubscriberPhone, "%d",theSubscriberPhone);
+
+    char selectstmt[MAXSQLSTATEMENTSTRINGSIZE] =
+        "SELECT subscriberPhone, subscriberName FROM Subscribers WHERE "
+        "subscriberPhone='";
+    strcat(selectstmt, stringSubscriberPhone);
+    strcat(selectstmt, "'");
+
+    printf("1st Full statement is %s \n", selectstmt);
+
+    PGresult *res = PQexec(conn, selectstmt);
+
+    // 检查 SQL 获取是否成功
+    if (PQresultStatus(res) != PGRES_TUPLES_OK)
+    {
+        fprintf(stderr,"1st RETRIVED/SELECT FAILED: %s\n", PQerrorMessage(conn));
+        PQclear(res);
+        bad_exit(conn);
+        return -1;
+    }
+
+    int numTuples = PQntuples(res);
+    if (numTuples == 0)
+    {
+        printf("\n subscriberPhone %s DOES NOT EXIST :( \n", stringSubscriberPhone);
+        PQclear(res);
+        bad_exit(conn);
+        return -1;
+    }
+
+    char *number = PQgetvalue(res,0,0);
+    char *name = PQgetvalue(res,0,1);
+    printf("Number: %s is owned by %s", number, name);
+    PQclear(res);
+    
+   
+   
+   // return 0;
 }
 
 /* Function: changeAddresses:
