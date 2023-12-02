@@ -72,8 +72,9 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
     strcat(selectstmt, stringSubscriberPhone);
     strcat(selectstmt, "'");
 
-
+/* TESTING ONLY
     printf("\n1st Full statement is %s \n", selectstmt);
+*/
 
     PGresult *res = PQexec(conn, selectstmt);
 
@@ -91,19 +92,20 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
     {
         printf("\nsubscriberPhone %s DOES NOT EXIST :( \n", stringSubscriberPhone);
         PQclear(res);
-        bad_exit(conn);
+       // bad_exit(conn);
         return -1;
     }
 
+/* TESTING ONLY
     char *number = PQgetvalue(res,0,0);
     char *name = PQgetvalue(res,0,1);
     printf("\nNumber: %s is owned by %s\n", number, name);
     PQclear(res);
-
+*/
     printf("\nStarting count!\n");
 
     char coin[MAXSQLSTATEMENTSTRINGSIZE] = 
-        "SELECT s1.subscriptionStartDate, s1.subscriptionInterval "
+        "SELECT DISTINCT s1.subscriptionStartDate, s1.subscriptionInterval "
         "FROM Subscriptions s1 "
         "WHERE s1.subscriberPhone ='";
         strcat(coin, stringSubscriberPhone);
@@ -128,7 +130,7 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 
     int count = PQntuples(countRes);
 //    char *phoneNumber = PQgetvalue(countRes,0,0); date 
-    printf("\nSubscriber %d has %d coincident subscriptions \n", theSubscriberPhone, count);
+    printf("Subscriber %d has %d coincident subscriptions \n", theSubscriberPhone, count);
 
     return count;
 
@@ -200,8 +202,41 @@ int main(int argc, char **argv)
     /* Perform the calls to countCoincidentSubscriptions listed in Section 6 of Lab4,
      * and print messages as described.
      */
-    countCoincidentSubscriptions(conn, 8315512);
-    
+   // countCoincidentSubscriptions(conn, 8315512);
+
+    int phone;
+    int result; 
+
+    // #1
+    phone = 8315512;
+    result = countCoincidentSubscriptions(conn, phone);
+    if ( result == -1)
+    {
+        printf("No subscriber exists whose subscriberPhone is %d\n",phone);
+    }
+
+    //#2
+    phone = 8313293;
+    result = countCoincidentSubscriptions(conn, phone);
+    if ( result == -1)
+    {
+        printf("No subscriber exists whose subscriberPhone is %d\n",phone);
+    }
+    //#3
+    phone = 123456;
+    result = countCoincidentSubscriptions(conn, phone);
+    if ( result == -1)
+    {
+        printf("No subscriber exists whose subscriberPhone is %d\n",phone);
+    }
+
+    //#4
+    phone = 6502123;
+    result = countCoincidentSubscriptions(conn, phone);
+    if ( result == -1)
+    {
+        printf("No subscriber exists whose subscriberPhone is %d\n",phone);
+    }
     
     /* Extra newline for readability */
     printf("\n");
