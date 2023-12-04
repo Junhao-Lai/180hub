@@ -151,13 +151,14 @@ int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
 {
     char update[MAXSQLSTATEMENTSTRINGSIZE] = 
         "UPDATE Subscribers b SET subscriberAddress =' ";
-        strcat(conn, newAddress);
-        strcat(conn, "'");
-        strcat(conn,
-        "WHERE b.subscriberAddress != newAddress"
-        ""
+        strcat(update, newAddress);
+        strcat(update, "'");
+        strcat(update,
+        "WHERE b.subscriberAddress =' ");
+        strcat(update, oldAddress);
+        strcat(update, "'");
         
-        );
+     //   );
     PGresult *res_update = PQexec(conn, update);
     if (PQresultStatus(res_update) != PGRES_COMMAND_OK)
     {
@@ -168,9 +169,15 @@ int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
     }
         
     int update_count = atoi(PQcmdTuples(res_update));
+//    int update_count = PQntuples(res_update);
+
     PQclear(res_update);
+    printf("%d addresses which were %s were updated to %s\n", update_count, oldAddress, newAddress);
+
+   //    char *phoneNumber = PQgetvalue(countRes,0,0); date 
 
 
+    return update_count;
     return 0;
 }
 
@@ -268,17 +275,39 @@ int main(int argc, char **argv)
      * and print messages as described.
      */
     char *newAddress;
+    char *oldAddress;
 
+    oldAddress = "100 Asgard St, Asgard, AG, 00001";
     newAddress = "PQRS";
     result = changeAddresses(conn, oldAddress, newAddress);
     if ( result == -1)
     {
         printf("Illegal value for newAddress\n",newAddress);
     }
+
+    oldAddress = "3428A Lombard St, Tahoe City, CA, 96142";
+    newAddress = "ABCD";
+    result = changeAddresses(conn, oldAddress, newAddress);
+    if ( result == -1)
+    {
+        printf("Illegal value for newAddress\n",newAddress);
+    }
+
+    oldAddress = "IJL";
+    newAddress = "MNOP";
+    result = changeAddresses(conn, oldAddress, newAddress);
+    if ( result == -1)
+    {
+        printf("Illegal value for newAddress\n",newAddress);
+    }
+
+
+ /* 
     else
     {
-        printf("%d addresses which were %s were updated to\n", result, oldAddress, newAddress);
+        printf("%d addresses which were %s were updated to %s\n", update_count, oldAddress, newAddress);
     }
+*/
     /* Extra newline for readability */
     printf("\n");
 
