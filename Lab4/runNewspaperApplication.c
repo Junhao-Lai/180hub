@@ -149,6 +149,28 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 
 int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
 {
+    char update[MAXSQLSTATEMENTSTRINGSIZE] = 
+        "UPDATE Subscribers b SET subscriberAddress =' ";
+        strcat(conn, newAddress);
+        strcat(conn, "'");
+        strcat(conn,
+        "WHERE b.subscriberAddress != newAddress"
+        ""
+        
+        );
+    PGresult *res_update = PQexec(conn, update);
+    if (PQresultStatus(res_update) != PGRES_COMMAND_OK)
+    {
+        fprintf(stderr, "UPDATE failed: %s, %s", update, PQerrorMessage(conn));
+        PQclear(res_update);
+        bad_exit(conn);
+        return(-1);
+    }
+        
+    int update_count = atoi(PQcmdTuples(res_update));
+    PQclear(res_update);
+
+
     return 0;
 }
 
@@ -245,7 +267,18 @@ int main(int argc, char **argv)
     /* Perform the calls to changeAddresses listed in Section 6 of Lab4,
      * and print messages as described.
      */
-    
+    char *newAddress;
+
+    newAddress = "PQRS";
+    result = changeAddresses(conn, oldAddress, newAddress);
+    if ( result == -1)
+    {
+        printf("Illegal value for newAddress\n",newAddress);
+    }
+    else
+    {
+        printf("%d addresses which were %s were updated to\n", result, oldAddress, newAddress);
+    }
     /* Extra newline for readability */
     printf("\n");
 
