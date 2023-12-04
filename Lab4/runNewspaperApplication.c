@@ -65,6 +65,7 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 
     sprintf(stringSubscriberPhone, "%d",theSubscriberPhone);
 
+/* TESTING ONLY
 
     char selectstmt[MAXSQLSTATEMENTSTRINGSIZE] =
         "SELECT subscriberPhone, subscriberName FROM Subscribers WHERE "
@@ -72,9 +73,8 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
     strcat(selectstmt, stringSubscriberPhone);
     strcat(selectstmt, "'");
 
-/* TESTING ONLY
     printf("\n1st Full statement is %s \n", selectstmt);
-*/
+
 
     PGresult *res = PQexec(conn, selectstmt);
 
@@ -95,6 +95,7 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
        // bad_exit(conn);
         return -1;
     }
+*/
 
 /* TESTING ONLY
     char *number = PQgetvalue(res,0,0);
@@ -102,7 +103,8 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
     printf("\nNumber: %s is owned by %s\n", number, name);
     PQclear(res);
 */
-    printf("\nStarting count!\n");
+
+//    printf("\nStarting count!\n");
 
     char coin[MAXSQLSTATEMENTSTRINGSIZE] = 
         "SELECT DISTINCT s1.subscriptionStartDate, s1.subscriptionInterval "
@@ -130,7 +132,18 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 
     int count = PQntuples(countRes);
 //    char *phoneNumber = PQgetvalue(countRes,0,0); date 
-    printf("Subscriber %d has %d coincident subscriptions \n", theSubscriberPhone, count);
+
+    if(count > 1){
+        printf("Subscriber %d has %d coincident subscriptions \n", theSubscriberPhone, count);
+
+    }else if(count == 1){
+        printf("Subscriber %d has 0 coincident subscriptions \n", theSubscriberPhone);
+
+    }else{
+        printf("subscriberPhone %d DOES NOT EXIST :( \n", theSubscriberPhone);
+    };
+
+   // printf("Subscriber %d has %d coincident subscriptions \n", theSubscriberPhone, count);
 
     return count;
 
@@ -158,7 +171,6 @@ int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
         strcat(update, oldAddress);
         strcat(update, "'");
         
-     //   );
     PGresult *res_update = PQexec(conn, update);
     if (PQresultStatus(res_update) != PGRES_COMMAND_OK)
     {
@@ -195,8 +207,29 @@ int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
 
 int increaseSomeRates(PGconn *conn, int maxTotalRateIncrease)
 {    
-    return 0;
+    char stringFromNum[MAXNUMBERSTRINGSIZE];
+
+    char store[MAXSQLSTATEMENTSTRINGSIZE] = "SELECT increaseSomeRatesFunction( ";
+    sprintf(stringFromNum,"%d",maxTotalRateIncrease);
+    strcat(store, stringFromNum);
+    strcat(store, ")");
+
+    
+    PGresult *res_increase = PQexec(conn, store);
+    if (PQresultStatus(res_increase) != PGRES_TUPLES_OK)
+    {
+        fprintf(stderr, "FUNCTION increaseSomeRates failed on %d: %s/n", maxTotalRateIncrease, PQerrorMessage(conn));
+        PQclear(res_increase);
+        bad_exit(conn);
+    }
+    
+    int k = atoi(PQgetvalue(res_increase, 0, 0));
+
+    PQclear(res_increase);
+    return k;
 }
+   
+
 
 int main(int argc, char **argv)
 {
@@ -300,14 +333,13 @@ int main(int argc, char **argv)
     {
         printf("Illegal value for newAddress\n",newAddress);
     }
-
-
  /* 
     else
     {
         printf("%d addresses which were %s were updated to %s\n", update_count, oldAddress, newAddress);
     }
 */
+
     /* Extra newline for readability */
     printf("\n");
 
@@ -316,7 +348,19 @@ int main(int argc, char **argv)
      * 6 of Lab4, and print messages as described.
      * You may use helper functions to do this, if you want.
      */
-
+    int maxTotalIncrease;
+    
+    maxTotalIncrease = 100;
+    result = increaseSomeRates(conn, maxTotalIncrease);
+    if ( result >= 0)
+    {
+        printf("Total increase for maxTotalIncrease %d is %d\n", maxTotalIncrease, result);
+    }
+    else
+    {
+        printf("Error: Value returned by increaseSomeRates for maxTotalIncrease %d is %d", maxTotalIncrease, result);
+    }
+        
 
     good_exit(conn);
     return 0;

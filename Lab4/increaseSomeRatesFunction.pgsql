@@ -1,12 +1,15 @@
 CREATE OR REPLACE FUNCTION
-fireSomePlayersFunction(maxFired INTEGER)
+increaseSomeRatesFunction(maxTotalRateIncrease INTEGER)
 RETURNS INTEGER AS $$
 
 
     DECLARE
-    	numFired		INTEGER;	  /* Number actually fired, the value returned */
-    	thePlayerID	INTEGER;  /* The player to be fired */
+    	maxTotalRateIncrease		INTEGER;	  /* Number actually fired, the value returned */
 
+
+        /* thePlayerID	INTEGER; */  /* The player to be fired */
+
+/*
     DECLARE firingCursor CURSOR FOR
     	    SELECT p.personID
             FROM Persons p, Players play, GamePlayers gp
@@ -17,15 +20,23 @@ RETURNS INTEGER AS $$
             GROUP BY p.personID
             HAVING SUM(gp.minutesPlayed) > 60
             ORDER BY p.salary DESC;
+*/
+
+    DECLARE curs1 CURSOR FOR
+        SELECT COUNT(*) AS numSubscriberSK
+        FROM Subscriptions C, SubscriptionKinds sk
+        WHERE C.subscriptionInterval = sk.subscriptionInterval
+        AND C.subscriptionMode = sk.subscriptionMode;
+
 
     BEGIN
 
 	-- Input Validation
-	IF maxFired <= 0 THEN
+	IF maxTotalRateIncrease <= 0 THEN
 	    RETURN -1;		/* Illegal value of maxFired */
 	    END IF;
 
-        numFired := 0;
+        maxTotalRateIncrease := 0;
 
         OPEN firingCursor;
 
