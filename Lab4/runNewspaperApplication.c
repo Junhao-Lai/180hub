@@ -123,7 +123,7 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
     
     if (PQresultStatus(countRes) != PGRES_TUPLES_OK)
     {
-        fprintf(stderr,"Error counting coincident: %s\n", PQerrorMessage(conn));
+        fprintf(stderr,"Error counting coincident (Select Failed):  %s\n", PQerrorMessage(conn));
         PQclear(countRes);
         bad_exit(conn);
         return -1;
@@ -162,35 +162,45 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 
 int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
 {
-    char update[MAXSQLSTATEMENTSTRINGSIZE] = 
-        "UPDATE Subscribers b SET subscriberAddress =' ";
-        strcat(update, newAddress);
-        strcat(update, "'");
-        strcat(update,
-        "WHERE b.subscriberAddress =' ");
-        strcat(update, oldAddress);
-        strcat(update, "'");
-        
-    PGresult *res_update = PQexec(conn, update);
-    if (PQresultStatus(res_update) != PGRES_COMMAND_OK)
-    {
-        fprintf(stderr, "UPDATE failed: %s, %s", update, PQerrorMessage(conn));
-        PQclear(res_update);
+    PGresult *res;
+    char command[100];
+    sprintf(command,"SELECT subscriberAddress FROM Subscribers WHERE subscriberAddress = '%s';", oldAddress);
+    res = PQexec(conn, command);
+    if (PQresultStatus(res) != PGRES_TUPLES_OK){
+        fprintf(stderr, "SELECT failed: %s", PQerrorMessage(conn));
+        PQclear(res);
         bad_exit(conn);
-        return(-1);
+        return -1;
     }
-        
-    int update_count = atoi(PQcmdTuples(res_update));
-//    int update_count = PQntuples(res_update);
+    int num = PQntuples(res);
+    PQclear(res);
 
-    PQclear(res_update);
-    printf("%d addresses which were %s were updated to %s\n", update_count, oldAddress, newAddress);
+    if(num == 0){ //if the address not in tables
+        printf("0 address which were %s were updated to %s\n", oldAddress, newAddress);
+        return 0;
+    }
 
-   //    char *phoneNumber = PQgetvalue(countRes,0,0); date 
+    char update[100] ;
+    sprintf(update, "UPDATE Subscribers SET subscriberAddress = '%s' WHERE subscriberAddress = '%s'", newAddress, oldAddress);
+    res = PQexec(conn,update);
+    if(PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+        fprintf(stderr, "UPDATE failed: %s", PQerrorMessage(conn));
+        PQclear(res);
+        bad_exit(conn);
+        return -1;
+    }
+    PQclear(res);
+    
+    int count = atoi(PQcmdTuples(res));
+    if(count == 0){
+        printf("0 address which were %s were updated to %s\n", oldAddress, newAddress);
+    }
+    else{
+        printf("%d addresses which were %s were updated to %s\n", count, oldAddress, newAddress);
+    }
+    return count;
 
-
-    return update_count;
-    return 0;
 }
 
 /* Function: increaseSomeRates:
@@ -223,10 +233,10 @@ int increaseSomeRates(PGconn *conn, int maxTotalRateIncrease)
         bad_exit(conn);
     }
     
-    int k = atoi(PQgetvalue(res_increase, 0, 0));
+    int a = atoi(PQgetvalue(res_increase, 0, 0));
 
     PQclear(res_increase);
-    return k;
+    return a;
 }
    
 
@@ -333,6 +343,8 @@ int main(int argc, char **argv)
     {
         printf("Illegal value for newAddress\n",newAddress);
     }
+
+
  /* 
     else
     {
