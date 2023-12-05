@@ -47,7 +47,6 @@ static void bad_exit(PGconn *conn)
  * in that function, and if Lab4 says do things in main, do them in main,
  * possibly using a helper function, if you'd like.
  */
-
 /* Function: countCoincidentSubscriptions:
  * -------------------------------------
  * Parameters:  connection, and theSubscriberPhone, which should be the ID of a subscriber.
@@ -60,51 +59,26 @@ static void bad_exit(PGconn *conn)
 
 int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 {
-    // string of fixed size
     char stringSubscriberPhone[MAXNUMBERSTRINGSIZE];
+    sprintf(stringSubscriberPhone, "%d", theSubscriberPhone); //转成str
 
-    sprintf(stringSubscriberPhone, "%d",theSubscriberPhone);
+    //subscriberPhone exists?
+    char exist[MAXSQLSTATEMENTSTRINGSIZE] = 
+        "SELECT b.subscriberPhone "
+        "FROM Subscribers b " 
+        "WHERE b.subscriberPhone = '";
+        strcat(exist, stringSubscriberPhone);
+        strcat(exist, "'");
 
-/* TESTING ONLY
-
-    char selectstmt[MAXSQLSTATEMENTSTRINGSIZE] =
-        "SELECT subscriberPhone, subscriberName FROM Subscribers WHERE "
-        "subscriberPhone='";
-    strcat(selectstmt, stringSubscriberPhone);
-    strcat(selectstmt, "'");
-
-    printf("\n1st Full statement is %s \n", selectstmt);
-
-
-    PGresult *res = PQexec(conn, selectstmt);
-
-    // 检查 SQL 获取是否成功
-    if (PQresultStatus(res) != PGRES_TUPLES_OK)
+    PGresult *res_exist = PQexec(conn, exist);
+    if (PQresultStatus(res_exist) != PGRES_TUPLES_OK)
     {
-        fprintf(stderr,"1st RETRIVED/SELECT FAILED: %s\n", PQerrorMessage(conn));
-        PQclear(res);
+        fprintf(stderr, "SELECT for subscriberPhone failed: %s, %s", exist, PQerrorMessage(conn));
+        PQclear(res_exist);
         bad_exit(conn);
-        return -1;
+        return(-1);
     }
 
-    int numTuples = PQntuples(res);
-    if (numTuples == 0)
-    {
-        printf("\nsubscriberPhone %s DOES NOT EXIST :( \n", stringSubscriberPhone);
-        PQclear(res);
-       // bad_exit(conn);
-        return -1;
-    }
-*/
-
-/* TESTING ONLY
-    char *number = PQgetvalue(res,0,0);
-    char *name = PQgetvalue(res,0,1);
-    printf("\nNumber: %s is owned by %s\n", number, name);
-    PQclear(res);
-*/
-
-//    printf("\nStarting count!\n");
 
     char coin[MAXSQLSTATEMENTSTRINGSIZE] = 
         "SELECT DISTINCT s1.subscriptionStartDate, s1.subscriptionInterval "
@@ -119,34 +93,31 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
         "AND s1.subscriptionStartDate <= s2.subscriptionStartDate AND "
         "s2.subscriptionStartDate <= DATE(s1.subscriptionStartDate + s1.subscriptionInterval))");
 
-    PGresult *countRes = PQexec(conn, coin);
-    
-    if (PQresultStatus(countRes) != PGRES_TUPLES_OK)
+    PGresult *res_coin = PQexec(conn, coin);
+
+    if (PQresultStatus(res_coin) != PGRES_TUPLES_OK)
     {
-        fprintf(stderr,"Error counting coincident (Select Failed):  %s\n", PQerrorMessage(conn));
-        PQclear(countRes);
+        fprintf(stderr, "SELECT for coincidence failed: %s, %s", coin, PQerrorMessage(conn));
+        PQclear(res_coin);
         bad_exit(conn);
-        return -1;
+        return(-1);
+    }
+
+    int count = PQntuples(res_coin);
+
+    if (count == 0){ 
+        printf("No subsciber exists whose subscriberPhone is %d\n",theSubscriberPhone);
+    }
+    else if (count == 1){
+        printf("Subscriber %d has 0 coincident subscriptions.\n", theSubscriberPhone);
+    }
+    else{
+        printf("Subscriber %d has %d coincident subscriptions.\n", theSubscriberPhone, count);
     }
 
 
-    int count = PQntuples(countRes);
-//    char *phoneNumber = PQgetvalue(countRes,0,0); date 
-
-    if(count > 1){
-        printf("Subscriber %d has %d coincident subscriptions \n", theSubscriberPhone, count);
-
-    }else if(count == 1){
-        printf("Subscriber %d has 0 coincident subscriptions \n", theSubscriberPhone);
-
-    }else{
-        printf("subscriberPhone %d DOES NOT EXIST :( \n", theSubscriberPhone);
-    };
-
-   // printf("Subscriber %d has %d coincident subscriptions \n", theSubscriberPhone, count);
 
     return count;
-
 
 }
 
@@ -162,46 +133,55 @@ int countCoincidentSubscriptions(PGconn *conn, int theSubscriberPhone)
 
 int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
 {
-    PGresult *res;
-    char command[100];
-    sprintf(command,"SELECT subscriberAddress FROM Subscribers WHERE subscriberAddress = '%s';", oldAddress);
-    res = PQexec(conn, command);
-    if (PQresultStatus(res) != PGRES_TUPLES_OK){
-        fprintf(stderr, "SELECT failed: %s", PQerrorMessage(conn));
-        PQclear(res);
-        bad_exit(conn);
-        return -1;
-    }
-    int num = PQntuples(res);
-    PQclear(res);
+    // char address[MAXSQLSTATEMENTSTRINGSIZE] =
+    //     "SELECT b.subscriberAddress " 
+    //     "FROM Subscribers b "
+    //     "WHERE subscriberAddress ='";
+    //     strcat(address, oldAddress);
+    //     strcat(address, "'");
 
-    if(num == 0){ //if the address not in tables
-        printf("0 address which were %s were updated to %s\n", oldAddress, newAddress);
-        return 0;
-    }
+    char address[MAXSQLSTATEMENTSTRINGSIZE];
+    sprintf(address,"SELECT subscriberAddress FROM Subscribers WHERE subscriberAddress = '%s';", oldAddress);
 
-    char update[100] ;
-    sprintf(update, "UPDATE Subscribers SET subscriberAddress = '%s' WHERE subscriberAddress = '%s'", newAddress, oldAddress);
-    res = PQexec(conn,update);
-    if(PQresultStatus(res) != PGRES_COMMAND_OK)
+    PGresult *res_address = PQexec(conn, address);
+    if (PQresultStatus(res_address) != PGRES_TUPLES_OK)
     {
-        fprintf(stderr, "UPDATE failed: %s", PQerrorMessage(conn));
-        PQclear(res);
+        fprintf(stderr, "SELECT for subscriberAddress failed: %s, %s", address, PQerrorMessage(conn));
+        PQclear(res_address);
         bad_exit(conn);
-        return -1;
+        return(-1);
     }
-    PQclear(res);
-    
-    int count = atoi(PQcmdTuples(res));
-    if(count == 0){
-        printf("0 address which were %s were updated to %s\n", oldAddress, newAddress);
-    }
-    else{
-        printf("%d addresses which were %s were updated to %s\n", count, oldAddress, newAddress);
-    }
-    return count;
+    PQclear(res_address);
 
+    // char update[MAXSQLSTATEMENTSTRINGSIZE] = 
+    //     "UPDATE Subscribers SET subscriberAddress ='";
+    //     strcat(update, newAddress);
+    //     strcat(update, "'");
+    //     "WHERE subscriberAddress ='";
+    //     strcat(update, oldAddress);
+    //     strcat(update, "'");
+
+    char update[MAXSQLSTATEMENTSTRINGSIZE];
+    sprintf(update,"UPDATE Subscribers SET subscriberAddress = '%s' WHERE subscriberAddress = '%s';",newAddress, oldAddress);
+
+    PGresult *res_update = PQexec(conn, update);
+    if (PQresultStatus(res_update) != PGRES_COMMAND_OK)
+    {
+        fprintf(stderr, "SELECT for subscriberAddress #2 failed: %s, %s", update, PQerrorMessage(conn));
+        PQclear(res_update);
+        bad_exit(conn);
+        return(-1);
+    }
+    PQclear(res_update);
+    int count = atoi(PQcmdTuples(res_update));
+
+    if(count >= 0){
+        printf("%d addresses which were %s were updated to %s \n",count, oldAddress, newAddress);
+    }
+
+    return count;
 }
+
 
 /* Function: increaseSomeRates:
  * -------------------------------
@@ -274,7 +254,6 @@ int main(int argc, char **argv)
     /* Perform the calls to countCoincidentSubscriptions listed in Section 6 of Lab4,
      * and print messages as described.
      */
-   // countCoincidentSubscriptions(conn, 8315512);
 
     int phone;
     int result; 
@@ -294,8 +273,9 @@ int main(int argc, char **argv)
     {
         printf("No subscriber exists whose subscriberPhone is %d\n",phone);
     }
+
     //#3
-    phone = 123456;
+    phone = 1234567;
     result = countCoincidentSubscriptions(conn, phone);
     if ( result == -1)
     {
@@ -320,6 +300,7 @@ int main(int argc, char **argv)
     char *newAddress;
     char *oldAddress;
 
+    // #1
     oldAddress = "100 Asgard St, Asgard, AG, 00001";
     newAddress = "PQRS";
     result = changeAddresses(conn, oldAddress, newAddress);
@@ -328,6 +309,7 @@ int main(int argc, char **argv)
         printf("Illegal value for newAddress\n",newAddress);
     }
 
+    //#2
     oldAddress = "3428A Lombard St, Tahoe City, CA, 96142";
     newAddress = "ABCD";
     result = changeAddresses(conn, oldAddress, newAddress);
@@ -336,6 +318,7 @@ int main(int argc, char **argv)
         printf("Illegal value for newAddress\n",newAddress);
     }
 
+    //#3s
     oldAddress = "IJL";
     newAddress = "MNOP";
     result = changeAddresses(conn, oldAddress, newAddress);

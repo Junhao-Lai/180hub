@@ -4,12 +4,9 @@ RETURNS INTEGER AS $$
 
 
     DECLARE
-    	maxTotalRateIncrease		INTEGER;	  /* Number actually fired, the value returned */
+    	maxTotalRateIncrease        INTEGER;
 
 
-        /* thePlayerID	INTEGER; */  /* The player to be fired */
-
-/*
     DECLARE firingCursor CURSOR FOR
     	    SELECT p.personID
             FROM Persons p, Players play, GamePlayers gp
