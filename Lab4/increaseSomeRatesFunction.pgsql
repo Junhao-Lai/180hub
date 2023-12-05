@@ -4,10 +4,21 @@ RETURNS INTEGER AS $$
 
 
     DECLARE
-    	maxTotalRateIncrease        INTEGER;
+        totalIncrease INTEGER;
+        currentIncrease INTEGER;
+        popularity INTEGER;
+        
+
+    DECLARE subscriptionsCursor CURSOR FOR
+        SELECT C.subscriberPhone
+        FROM Subscriptions C
+            SELECT COUNT(*) AS populriry 
+            FROM SubscriptionKinds sk
+            WHERE C.subscriptionInterval = sk.subscriptionInterval
+            AND C.subscriptionMode = sk.subscriptionMode;
 
 
-    DECLARE firingCursor CURSOR FOR
+/*
     	    SELECT p.personID
             FROM Persons p, Players play, GamePlayers gp
             WHERE p.personID = play.playerID 
@@ -19,11 +30,6 @@ RETURNS INTEGER AS $$
             ORDER BY p.salary DESC;
 */
 
-    DECLARE curs1 CURSOR FOR
-        SELECT COUNT(*) AS numSubscriberSK
-        FROM Subscriptions C, SubscriptionKinds sk
-        WHERE C.subscriptionInterval = sk.subscriptionInterval
-        AND C.subscriptionMode = sk.subscriptionMode;
 
 
     BEGIN
@@ -35,24 +41,39 @@ RETURNS INTEGER AS $$
 
         maxTotalRateIncrease := 0;
 
-        OPEN firingCursor;
+        OPEN subscriptionsCursor;
 
         LOOP
  
-            FETCH firingCursor INTO thePlayerID;
+            FETCH subscriptionsCursor INTO subscriberPhone;
 
             -- Exit if there are no more records for firingCursor,
             -- or when we already have performed maxFired firings.
-            EXIT WHEN NOT FOUND OR numFired >= maxFired;
+            EXIT WHEN NOT FOUND;
 
-            UPDATE Players
-            SET teamID = NULL
-            WHERE playerID = thePlayerID;
+            currentIncrease := 0;
+            IF popularity >= 5 THEN
+                currentIncrease := 10;
+            END IF;
+            IF popularity = 4 THEN
+                currentIncrease := 5;
+            END IF;            
+            IF popularity = 3 THEN
+                currentIncrease := 5;
+            END IF;
+            IF popularity = 2 THEN
+                currentIncrease := 3;
+            END IF;
 
-            numFired := numFired + 1;
 
+            IF totalIncrease + currentIncrease <= maxTotalIncrease THEN
+                UPDATE Things
+                SET cost = theCost + currentIncrease
+                WHERE thingID = theThingID;
+
+                totalIncrease := totalIncrease + currentIncrease;
         END LOOP;
-        CLOSE firingCursor;
+        CLOSE subscriptionsCursor;
 
 	RETURN numFired;
 

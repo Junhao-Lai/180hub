@@ -199,7 +199,7 @@ int increaseSomeRates(PGconn *conn, int maxTotalRateIncrease)
 {    
     char stringFromNum[MAXNUMBERSTRINGSIZE];
 
-    char store[MAXSQLSTATEMENTSTRINGSIZE] = "SELECT increaseSomeRatesFunction( ";
+    char store[MAXSQLSTATEMENTSTRINGSIZE] = "SELECT increaseSomeRatesFunction(";
     sprintf(stringFromNum,"%d",maxTotalRateIncrease);
     strcat(store, stringFromNum);
     strcat(store, ")");
