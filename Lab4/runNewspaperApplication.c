@@ -198,29 +198,27 @@ int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
 int increaseSomeRates(PGconn *conn, int maxTotalRateIncrease)
 {    
     // char stringFromNum[MAXNUMBERSTRINGSIZE];
-
     // char store[MAXSQLSTATEMENTSTRINGSIZE] = "SELECT increaseSomeRatesFunction(";
     // sprintf(stringFromNum, "%d", maxTotalRateIncrease);
     // strcat(store, stringFromNum);
     // strcat(store, ")");
 
-    char store[MAXSQLSTATEMENTSTRINGSIZE];
-    sprintf(store, "SELECT increaseSomeRatesFunction(%d)",maxTotalRateIncrease);
+    char cmd[MAXSQLSTATEMENTSTRINGSIZE];
+    sprintf(cmd, "SELECT increaseSomeRatesFunction(%d);", maxTotalRateIncrease);
+    PGresult *res = PQexec(conn, cmd);
 
-    
-    PGresult *res_increase = PQexec(conn, store);
-    if (PQresultStatus(res_increase) != PGRES_TUPLES_OK)
-    {
-        fprintf(stderr, "FUNCTION increaseSomeRates failed on %d: %s/n", maxTotalRateIncrease, PQerrorMessage(conn));
-        PQclear(res_increase);
-        bad_exit(conn);
+    if(PQresultStatus(res) != PGRES_TUPLES_OK){
+        printf("No data retrieved on rate %d and message is %s\n", maxTotalRateIncrease, PQerrorMessage(conn));
+        PQclear(res);
+        good_exit(conn);
+       // return -1;
+    }else{
+        int totalIncrease = atoi(PQgetvalue(res,0,0));
+        PQclear(res);
+        return totalIncrease;
     }
-    
-    int a = atoi(PQgetvalue(res_increase, 0, 0));
-
-    PQclear(res_increase);
-    return a;
 }
+
    
 
 
@@ -347,7 +345,9 @@ int main(int argc, char **argv)
      * You may use helper functions to do this, if you want.
      */
     int maxTotalRateIncrease;
-    
+
+    increaseSomeRates(conn, 100);
+
     maxTotalRateIncrease = 100;
     result = increaseSomeRates(conn, maxTotalRateIncrease);
     if ( result >= 0)
