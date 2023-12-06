@@ -197,12 +197,15 @@ int changeAddresses(PGconn *conn, char *oldAddress, char *newAddress)
 
 int increaseSomeRates(PGconn *conn, int maxTotalRateIncrease)
 {    
-    char stringFromNum[MAXNUMBERSTRINGSIZE];
+    // char stringFromNum[MAXNUMBERSTRINGSIZE];
 
-    char store[MAXSQLSTATEMENTSTRINGSIZE] = "SELECT increaseSomeRatesFunction(";
-    sprintf(stringFromNum,"%d",maxTotalRateIncrease);
-    strcat(store, stringFromNum);
-    strcat(store, ")");
+    // char store[MAXSQLSTATEMENTSTRINGSIZE] = "SELECT increaseSomeRatesFunction(";
+    // sprintf(stringFromNum, "%d", maxTotalRateIncrease);
+    // strcat(store, stringFromNum);
+    // strcat(store, ")");
+
+    char store[MAXSQLSTATEMENTSTRINGSIZE];
+    sprintf(store, "SELECT increaseSomeRatesFunction(%d)",maxTotalRateIncrease);
 
     
     PGresult *res_increase = PQexec(conn, store);
@@ -343,17 +346,53 @@ int main(int argc, char **argv)
      * 6 of Lab4, and print messages as described.
      * You may use helper functions to do this, if you want.
      */
-    int maxTotalIncrease;
+    int maxTotalRateIncrease;
     
-    maxTotalIncrease = 100;
-    result = increaseSomeRates(conn, maxTotalIncrease);
+    maxTotalRateIncrease = 100;
+    result = increaseSomeRates(conn, maxTotalRateIncrease);
     if ( result >= 0)
     {
-        printf("Total increase for maxTotalIncrease %d is %d\n", maxTotalIncrease, result);
+        printf("Total increase for maxTotalRateIncrease %d is %d\n", maxTotalRateIncrease, result);
+    }else{
+        printf("Error: Value returned by increaseSomeRates for maxTotalRateIncrease %d is %d", maxTotalRateIncrease, result);
     }
-    else
+
+    maxTotalRateIncrease = 45;
+    result = increaseSomeRates(conn, maxTotalRateIncrease);
+    if ( result >= 0)
     {
-        printf("Error: Value returned by increaseSomeRates for maxTotalIncrease %d is %d", maxTotalIncrease, result);
+        printf("Total increase for maxTotalRateIncrease %d is %d\n", maxTotalRateIncrease, result);
+    }else{
+        printf("Error: Value returned by increaseSomeRates for maxTotalRateIncrease %d is %d", maxTotalRateIncrease, result);
+    }
+
+
+    maxTotalRateIncrease = 29;
+    result = increaseSomeRates(conn, maxTotalRateIncrease);
+    if ( result >= 0)
+    {
+        printf("Total increase for maxTotalRateIncrease %d is %d\n", maxTotalRateIncrease, result);
+    }else{
+        printf("Error: Value returned by increaseSomeRates for maxTotalRateIncrease %d is %d", maxTotalRateIncrease, result);
+    }
+
+    maxTotalRateIncrease = 2;
+    result = increaseSomeRates(conn, maxTotalRateIncrease);
+    if (result >= 0)
+    {
+        printf("Total increase for maxTotalRateIncrease %d is %d\n", maxTotalRateIncrease, result);
+    }else{
+        printf("Error: Value returned by increaseSomeRates for maxTotalRateIncrease %d is %d", maxTotalRateIncrease, result);
+    }
+
+
+    maxTotalRateIncrease = 0;
+    result = increaseSomeRates(conn, maxTotalRateIncrease);
+    if ( result >= 0)
+    {
+        printf("Total increase for maxTotalRateIncrease %d is %d\n", maxTotalRateIncrease, result);
+    }else{
+        printf("FAIL: increaseSomeRates for max TotalRateIncrease %d is %d", maxTotalRateIncrease, result);
     }
         
 

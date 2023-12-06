@@ -10,13 +10,22 @@ RETURNS INTEGER AS $$
         
 
     DECLARE subscriptionsCursor CURSOR FOR
+            SELECT sk.subscriptionMode, sk.subscriptionInterval, COUNT(*) AS popularity
+            FROM SubscriptionKinds sk, Subscriptions C
+            WHERE  C.subscriptionInterval = sk.subscriptionInterval
+                AND C.subscriptionMode = sk.subscriptionMode
+                GROUP BY sk.subscriptionMode, sk.subscriptionInterval
+                ORDER BY popularity DESC;
+
+
+/*
         SELECT C.subscriberPhone
         FROM Subscriptions C
-            SELECT COUNT(*) AS populriry 
+            SELECT COUNT(*) AS popularity 
             FROM SubscriptionKinds sk
             WHERE C.subscriptionInterval = sk.subscriptionInterval
             AND C.subscriptionMode = sk.subscriptionMode;
-
+*/
 
 /*
     	    SELECT p.personID
@@ -36,7 +45,7 @@ RETURNS INTEGER AS $$
 
 	-- Input Validation
 	IF maxTotalRateIncrease <= 0 THEN
-	    RETURN -1;		/* Illegal value of maxFired */
+	    RETURN -1;		/* Illegal value of maxTotalRateIncrease */
 	    END IF;
 
         maxTotalRateIncrease := 0;
@@ -45,7 +54,7 @@ RETURNS INTEGER AS $$
 
         LOOP
  
-            FETCH subscriptionsCursor INTO subscriberPhone;
+            FETCH subscriptionsCursor INTO totalIncrease;
 
             -- Exit if there are no more records for firingCursor,
             -- or when we already have performed maxFired firings.
@@ -67,15 +76,16 @@ RETURNS INTEGER AS $$
 
 
             IF totalIncrease + currentIncrease <= maxTotalIncrease THEN
-                UPDATE Things
-                SET cost = theCost + currentIncrease
-                WHERE thingID = theThingID;
+                UPDATE SubscriptionKinds sk
+                SET rate = rate + currentIncrease
+                WHERE rate = totalIncrease;
 
                 totalIncrease := totalIncrease + currentIncrease;
+            END IF;
         END LOOP;
         CLOSE subscriptionsCursor;
 
-	RETURN numFired;
+	RETURN totalIncrease;
 
     END
 
